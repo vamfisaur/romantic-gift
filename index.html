@@ -210,74 +210,115 @@
       <textarea placeholder="Add your surprise here..."></textarea>
     </div>
   </div>
+<script>
+  const PASSWORD = "120422"; // change to your password
 
-  <script>
-    const PASSWORD = "120422"; // change to your password
+  const loginOverlay = document.getElementById("loginOverlay");
+  const mainContainer = document.getElementById("mainContainer");
+  const passwordInput = document.getElementById("passwordInput");
+  const errorMsg = document.getElementById("errorMsg");
 
-    const loginOverlay = document.getElementById("loginOverlay");
-    const mainContainer = document.getElementById("mainContainer");
-    const passwordInput = document.getElementById("passwordInput");
-    const errorMsg = document.getElementById("errorMsg");
+  // Show login on load
+  window.onload = () => {
+    loginOverlay.style.display = "flex";
+    passwordInput.focus();
+    restoreContent();
+  };
 
-    // Show login on load
-    window.onload = () => {
-      loginOverlay.style.display = "flex";
-      passwordInput.focus();
-    };
-
-    function checkPassword() {
-      if (passwordInput.value.trim() === PASSWORD) {
-        loginOverlay.style.display = "none";
-        mainContainer.style.display = "block";
-      } else {
-        errorMsg.textContent = "Wrong password, try again!";
-        passwordInput.value = "";
-        passwordInput.focus();
-      }
-    }
-
-    function closeLogin() {
+  function checkPassword() {
+    if (passwordInput.value.trim() === PASSWORD) {
       loginOverlay.style.display = "none";
+      mainContainer.style.display = "block";
+    } else {
+      errorMsg.textContent = "Wrong password, try again!";
+      passwordInput.value = "";
+      passwordInput.focus();
     }
+  }
 
-    // Gift Popups
-    const giftOverlay = document.getElementById("giftOverlay");
-    const giftPopups = document.querySelectorAll("#giftOverlay .popup");
+  function closeLogin() {
+    loginOverlay.style.display = "none";
+  }
 
-    function openGift(id) {
-      giftOverlay.style.display = "flex";
-      giftPopups.forEach(p => p.style.display = "none");
-      document.getElementById(id).style.display = "block";
-    }
+  // Gift Popups
+  const giftOverlay = document.getElementById("giftOverlay");
+  const giftPopups = document.querySelectorAll("#giftOverlay .popup");
 
-    function closeGift() {
-      giftOverlay.style.display = "none";
-      giftPopups.forEach(p => p.style.display = "none");
-    }
+  function openGift(id) {
+    giftOverlay.style.display = "flex";
+    giftPopups.forEach(p => p.style.display = "none");
+    document.getElementById(id).style.display = "block";
+  }
 
-    // Photo upload
-    const photoInput = document.getElementById("photoInput");
-    const photoPreview = document.getElementById("photoPreview");
-    const caption = document.getElementById("caption");
+  function closeGift() {
+    giftOverlay.style.display = "none";
+    giftPopups.forEach(p => p.style.display = "none");
+  }
 
-    photoInput.addEventListener("change", () => {
-      const file = photoInput.files[0];
-      if (!file) return;
-      if (!file.type.startsWith("image/")) {
-        alert("Please upload an image file.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = e => {
-        photoPreview.src = e.target.result;
-        photoPreview.style.display = "block";
-        caption.style.display = "block";
-        caption.textContent = "Write a caption...";
-      };
-      reader.readAsDataURL(file);
-      photoInput.value = "";
+  // ===== Persistent Storage =====
+  function saveContent(key, value) {
+    localStorage.setItem(key, value);
+  }
+
+  function restoreContent() {
+    // Restore main editable fields
+    document.querySelectorAll("[contenteditable], textarea").forEach(el => {
+      const saved = localStorage.getItem(el.id || el.placeholder);
+      if (saved !== null) el.innerHTML = saved;
     });
-  </script>
+
+    // Restore photo + caption
+    const savedPhoto = localStorage.getItem("photo");
+    if (savedPhoto) {
+      photoPreview.src = savedPhoto;
+      photoPreview.style.display = "block";
+      caption.style.display = "block";
+    }
+    const savedCaption = localStorage.getItem("caption");
+    if (savedCaption) caption.innerHTML = savedCaption;
+  }
+
+  // Save text/letters/poems automatically
+  document.addEventListener("input", e => {
+    if (e.target.matches("[contenteditable]")) {
+      saveContent(e.target.id || e.target.getAttribute("placeholder"), e.target.innerHTML);
+    }
+    if (e.target.tagName === "TEXTAREA") {
+      saveContent(e.target.placeholder, e.target.value);
+    }
+  });
+
+  // Photo upload
+  const photoInput = document.getElementById("photoInput");
+  const photoPreview = document.getElementById("photoPreview");
+  const caption = document.getElementById("caption");
+
+  photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      photoPreview.src = e.target.result;
+      photoPreview.style.display = "block";
+      caption.style.display = "block";
+      caption.textContent = "Write a caption...";
+      saveContent("photo", e.target.result); // Save image
+    };
+    reader.readAsDataURL(file);
+    photoInput.value = "";
+  });
+
+  // Save caption edits
+  caption.addEventListener("input", () => {
+    saveContent("caption", caption.innerHTML);
+  });
+</script>
+ 
 </body>
 </html>
+
 
