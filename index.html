@@ -5,181 +5,185 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Love Gift</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #ff66b2, #660066);
       margin: 0;
-      padding: 0;
-      background: #fff0f5;
-    }
-    .container {
-      padding: 20px;
-    }
-    h1 {
-      color: #e75480;
-    }
-    button {
-      background: #e75480;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      margin: 10px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #d9436a;
-    }
-    .popup {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      min-height: 100vh;
+      display: flex;
       justify-content: center;
       align-items: center;
+      color: #660066;
     }
-    .popup-content {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      text-align: center;
-      max-width: 90%;
-      width: 400px;
-      position: relative;
-    }
-    .close {
-      position: absolute;
-      top: 10px; right: 15px;
-      cursor: pointer;
-      font-size: 20px;
-      color: #e75480;
-    }
-    textarea {
-      width: 100%;
-      height: 150px;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
-    #photoPreview {
-      max-width: 100%;
-      margin-top: 10px;
-      display: none;
-      border-radius: 10px;
-    }
-    #caption {
-      margin-top: 5px;
-      font-style: italic;
-      color: #555;
-      display: none;
-    }
-    #savedIndicator {
-      display: none;
-      margin-top: 10px;
-      font-size: 14px;
-      color: green;
-      font-weight: bold;
-    }
-    /* Login modal */
-    #loginModal {
+    .overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .popup {
+      background: #fff;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 400px;
+      animation: popupIn 0.4s ease forwards;
+      position: relative;
+    }
+    @keyframes popupIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .popup-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #660066;
+    }
+    .close-btn {
+      background: #ffe6f2;
+      border: none;
+      font-size: 1.5rem;
+      color: #ff3399;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    #loginBox {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      text-align: center;
+    .popup input, .popup textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ffb3d9;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-bottom: 15px;
     }
-    input[type=password] {
-      padding: 10px;
-      width: 80%;
-      border: 1px solid #ccc;
-      border-radius: 10px;
+    .popup button[type="submit"],
+    .gift-btn {
+      background: #ff66b2;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .popup button[type="submit"]:hover,
+    .gift-btn:hover { background: #e05599; }
+    #mainContainer {
+      display: none;
+      background: #fff0f6;
+      padding: 40px 20px;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+    #mainContainer h1 {
+      font-family: 'Sacramento', cursive;
+      font-size: 2.5rem;
       margin-bottom: 10px;
+    }
+    .gift-btn { margin: 8px 0; }
+    .saved {
+      display: none;
+      color: green;
+      font-weight: bold;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <!-- Login Modal -->
-  <div id="loginModal">
-    <div id="loginBox">
-      <h2>Enter Password</h2>
-      <input type="password" id="passwordInput" placeholder="Password">
-      <br>
-      <button onclick="checkPassword()">Login</button>
-      <p id="loginError" style="color:red; display:none;">Wrong password, try again.</p>
+
+  <!-- Login -->
+  <div class="overlay" id="loginOverlay">
+    <div class="popup">
+      <div class="popup-header">
+        <h2>Enter Password</h2>
+      </div>
+      <input type="password" id="passwordInput" placeholder="Your secret password">
+      <div id="errorMsg" style="color:#cc0033; font-weight:bold; height:20px;"></div>
+      <button type="submit" onclick="checkPassword()">Login</button>
     </div>
   </div>
 
-  <div class="container" id="mainContent" style="display:none;">
-    <h1>💌 Love Gift 💌</h1>
-    <button onclick="openPopup('letterPopup')">Write a Letter</button>
-    <button onclick="openPopup('photoPopup')">Add Photo</button>
-    <button onclick="openPopup('poemPopup')">Write a Poem</button>
-    <button onclick="openPopup('surprisePopup')">Add Surprise</button>
+  <!-- Main -->
+  <div id="mainContainer">
+    <h1>My Special Gift</h1>
+    <button class="gift-btn" onclick="openGift('photoPopup')">📸 Photo</button>
+    <button class="gift-btn" onclick="openGift('letterPopup')">✉️ Letter</button>
+    <button class="gift-btn" onclick="openGift('poemPopup')">📜 Poem</button>
+    <button class="gift-btn" onclick="openGift('surprisePopup')">🎁 Surprise</button>
   </div>
 
-  <!-- Letter -->
-  <div id="letterPopup" class="popup">
-    <div class="popup-content">
-      <span class="close" onclick="closePopup('letterPopup')">&times;</span>
-      <h2>Letter</h2>
-      <textarea id="letterInput"></textarea><br>
+  <!-- Overlays -->
+  <div class="overlay" id="giftOverlay">
+    <!-- Photo -->
+    <div class="popup" id="photoPopup">
+      <div class="popup-header">
+        <h2>Upload Photo</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <input type="file" id="photoInput" accept="image/*">
+      <img id="photoPreview" style="display:none; max-width:100%; margin-top:10px; border-radius:10px;">
+      <button id="removePhotoBtn" onclick="removePhoto()" style="display:none; margin-top:10px;">Remove Photo</button>
+      <p id="savedIndicatorPhoto" class="saved">Saved!</p>
+    </div>
+    <!-- Letter -->
+    <div class="popup" id="letterPopup">
+      <div class="popup-header">
+        <h2>Letter</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <textarea id="letterInput" placeholder="Write your letter..."></textarea>
       <button onclick="saveLetter()">Save</button>
       <p id="savedIndicatorLetter" class="saved">Saved!</p>
     </div>
-  </div>
-
-  <!-- Photo -->
-  <div id="photoPopup" class="popup">
-    <div class="popup-content">
-      <span class="close" onclick="closePopup('photoPopup')">&times;</span>
-      <h2>Photo</h2>
-      <input type="file" id="photoInput" accept="image/*"><br>
-      <img id="photoPreview">
-      <p id="caption"></p>
-      <button id="removePhotoBtn" onclick="removePhoto()" style="display:none;">Remove Photo</button>
-      <p id="savedIndicatorPhoto" class="saved">Saved!</p>
-    </div>
-  </div>
-
-  <!-- Poem -->
-  <div id="poemPopup" class="popup">
-    <div class="popup-content">
-      <span class="close" onclick="closePopup('poemPopup')">&times;</span>
-      <h2>Poem</h2>
-      <textarea id="poemInput"></textarea><br>
+    <!-- Poem -->
+    <div class="popup" id="poemPopup">
+      <div class="popup-header">
+        <h2>Poem</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <textarea id="poemInput" placeholder="Write your poem..."></textarea>
       <button onclick="savePoem()">Save</button>
       <p id="savedIndicatorPoem" class="saved">Saved!</p>
     </div>
-  </div>
-
-  <!-- Surprise -->
-  <div id="surprisePopup" class="popup">
-    <div class="popup-content">
-      <span class="close" onclick="closePopup('surprisePopup')">&times;</span>
-      <h2>Surprise</h2>
-      <textarea id="surpriseInput"></textarea><br>
+    <!-- Surprise -->
+    <div class="popup" id="surprisePopup">
+      <div class="popup-header">
+        <h2>Surprise</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <textarea id="surpriseInput" placeholder="Write your surprise..."></textarea>
       <button onclick="saveSurprise()">Save</button>
       <p id="savedIndicatorSurprise" class="saved">Saved!</p>
     </div>
   </div>
 
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-  <script>
-    // 🔹 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAZx8qN76w_gfgKZncYZ9q27el1N0dNDWU",
       authDomain: "love-gift-490e7.firebaseapp.com",
@@ -190,112 +194,103 @@
       measurementId: "G-9WC34ZQPE9"
     };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    // 🔹 Login
+    // Login
+    const PASSWORD = "120422";
+    const loginOverlay = document.getElementById("loginOverlay");
+    const mainContainer = document.getElementById("mainContainer");
     function checkPassword() {
-      const pass = document.getElementById("passwordInput").value;
-      if (pass === "love123") {
-        document.getElementById("loginModal").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
+      const input = document.getElementById("passwordInput").value;
+      if (input === PASSWORD) {
+        loginOverlay.style.display = "none";
+        mainContainer.style.display = "block";
       } else {
-        document.getElementById("loginError").style.display = "block";
+        document.getElementById("errorMsg").textContent = "Wrong password!";
       }
     }
+    window.onload = () => { loginOverlay.style.display = "flex"; };
 
-    // 🔹 Popup controls
-    function openPopup(id) {
-      document.getElementById(id).style.display = "flex";
+    // Gift popup
+    const giftOverlay = document.getElementById("giftOverlay");
+    function openGift(id) {
+      giftOverlay.style.display = "flex";
+      document.querySelectorAll("#giftOverlay .popup").forEach(p => p.style.display = "none");
+      document.getElementById(id).style.display = "block";
     }
-    function closePopup(id) {
-      document.getElementById(id).style.display = "none";
-    }
+    function closeGift() { giftOverlay.style.display = "none"; }
 
-    // 🔹 Save Indicator
     function showSaved(id) {
       const el = document.getElementById(id);
       el.style.display = "block";
-      setTimeout(() => { el.style.display = "none"; }, 2000);
+      setTimeout(() => el.style.display = "none", 2000);
     }
 
-    // 🔹 Letter
-    function saveLetter() {
-      const text = document.getElementById("letterInput").value;
-      db.collection("gift").doc("letter").set({ content: text });
+    // Letter
+    const letterRef = doc(db, "gift", "letter");
+    async function saveLetter() {
+      await setDoc(letterRef, { content: document.getElementById("letterInput").value });
       showSaved("savedIndicatorLetter");
     }
-    db.collection("gift").doc("letter").onSnapshot(doc => {
-      if (doc.exists) document.getElementById("letterInput").value = doc.data().content;
+    onSnapshot(letterRef, snap => {
+      if (snap.exists()) document.getElementById("letterInput").value = snap.data().content;
     });
 
-    // 🔹 Photo
-    const photoInput = document.getElementById("photoInput");
-    const photoPreview = document.getElementById("photoPreview");
-    const caption = document.getElementById("caption");
-    const removePhotoBtn = document.getElementById("removePhotoBtn");
-
-    photoInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (file) {
-        const storageRef = storage.ref("photo/photo.jpg");
-        storageRef.put(file).then(() => {
-          storageRef.getDownloadURL().then(url => {
-            db.collection("gift").doc("photo").set({
-              imageUrl: url,
-              caption: "",
-              timestamp: Date.now()
-            });
-            showSaved("savedIndicatorPhoto");
-          });
-        });
-      }
-    });
-
-    db.collection("gift").doc("photo").onSnapshot(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-        photoPreview.src = data.imageUrl;
-        photoPreview.style.display = "block";
-        caption.textContent = data.caption || "";
-        caption.style.display = "block";
-        removePhotoBtn.style.display = "inline-block";
-      } else {
-        photoPreview.style.display = "none";
-        caption.style.display = "none";
-        removePhotoBtn.style.display = "none";
-      }
-    });
-
-    function removePhoto() {
-      const storageRef = storage.ref("photo/photo.jpg");
-      storageRef.delete().then(() => {
-        db.collection("gift").doc("photo").delete();
-        showSaved("savedIndicatorPhoto");
-      });
-    }
-
-    // 🔹 Poem
-    function savePoem() {
-      const text = document.getElementById("poemInput").value;
-      db.collection("gift").doc("poem").set({ content: text });
+    // Poem
+    const poemRef = doc(db, "gift", "poem");
+    async function savePoem() {
+      await setDoc(poemRef, { content: document.getElementById("poemInput").value });
       showSaved("savedIndicatorPoem");
     }
-    db.collection("gift").doc("poem").onSnapshot(doc => {
-      if (doc.exists) document.getElementById("poemInput").value = doc.data().content;
+    onSnapshot(poemRef, snap => {
+      if (snap.exists()) document.getElementById("poemInput").value = snap.data().content;
     });
 
-    // 🔹 Surprise
-    function saveSurprise() {
-      const text = document.getElementById("surpriseInput").value;
-      db.collection("gift").doc("surprise").set({ content: text });
+    // Surprise
+    const surpriseRef = doc(db, "gift", "surprise");
+    async function saveSurprise() {
+      await setDoc(surpriseRef, { content: document.getElementById("surpriseInput").value });
       showSaved("savedIndicatorSurprise");
     }
-    db.collection("gift").doc("surprise").onSnapshot(doc => {
-      if (doc.exists) document.getElementById("surpriseInput").value = doc.data().content;
+    onSnapshot(surpriseRef, snap => {
+      if (snap.exists()) document.getElementById("surpriseInput").value = snap.data().content;
     });
+
+    // Photo
+    const photoRef = doc(db, "gift", "photo");
+    const photoInput = document.getElementById("photoInput");
+    const photoPreview = document.getElementById("photoPreview");
+    const removeBtn = document.getElementById("removePhotoBtn");
+
+    photoInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const storageRef = ref(storage, "photo/photo.jpg");
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      await setDoc(photoRef, { imageUrl: url });
+      showSaved("savedIndicatorPhoto");
+    });
+
+    onSnapshot(photoRef, snap => {
+      if (snap.exists()) {
+        photoPreview.src = snap.data().imageUrl;
+        photoPreview.style.display = "block";
+        removeBtn.style.display = "block";
+      } else {
+        photoPreview.style.display = "none";
+        removeBtn.style.display = "none";
+      }
+    });
+
+    async function removePhoto() {
+      const storageRef = ref(storage, "photo/photo.jpg");
+      await deleteObject(storageRef);
+      await setDoc(photoRef, {}); // clear
+      showSaved("savedIndicatorPhoto");
+    }
   </script>
 </body>
 </html>
