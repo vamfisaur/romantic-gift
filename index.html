@@ -5,123 +5,235 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Love Gift</title>
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #ffeef8;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #ff66b2, #660066);
       margin: 0;
-      padding: 0;
-      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #660066;
     }
 
-    .popup {
+    .overlay {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
-      display: flex;
-      align-items: center;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
       justify-content: center;
+      align-items: center;
       z-index: 1000;
     }
 
-    .popup-content {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      width: 300px;
-      position: relative;
-      text-align: center;
-    }
-
-    .close {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      cursor: pointer;
-      font-size: 20px;
-      color: red;
-    }
-
-    #main {
-      display: none;
-      padding: 20px;
-    }
-
-    textarea {
+    .popup {
+      background: #fff;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
       width: 90%;
-      height: 100px;
-      margin: 10px 0;
-      border-radius: 10px;
-      padding: 10px;
+      max-width: 400px;
+      animation: popupIn 0.4s ease forwards;
+      position: relative;
     }
 
-    .photo-section img {
-      max-width: 80%;
-      margin-top: 10px;
-      display: none;
-      border-radius: 15px;
+    @keyframes popupIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
     }
 
-    button {
-      padding: 10px 15px;
-      margin: 5px;
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .popup-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #660066;
+    }
+
+    .close-btn {
+      background: #ffe6f2;
       border: none;
-      border-radius: 10px;
-      background: pink;
+      font-size: 1.5rem;
+      color: #ff3399;
       cursor: pointer;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.2s;
     }
+
+    .close-btn:hover {
+      background: #ffb3d9;
+    }
+
+    .popup input, .popup textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ffb3d9;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+
+    .popup button[type="submit"],
+    .gift-btn {
+      background: #ff66b2;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    .popup button[type="submit"]:hover,
+    .gift-btn:hover {
+      background: #e05599;
+    }
+
+    #mainContainer {
+      display: none;
+      background: #fff0f6;
+      padding: 40px 20px;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    #mainContainer h1 {
+      font-family: 'Sacramento', cursive;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    #mainContainer p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    .gift-btn { margin: 8px 0; }
 
     #status {
-      font-size: 14px;
-      margin-top: 8px;
+      margin-top: 10px;
+      font-size: 0.9rem;
       color: green;
+      font-weight: bold;
       display: none;
+    }
+
+    @media (max-width: 480px) {
+      .popup { padding: 20px; }
+      .popup-header h2 { font-size: 1.3rem; }
+      .close-btn { width: 30px; height: 30px; font-size: 1.2rem; }
+      #mainContainer h1 { font-size: 2rem; }
+      #mainContainer p { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
 
   <!-- Login Popup -->
-  <div id="loginPopup" class="popup">
-    <div class="popup-content">
-      <span class="close" onclick="closePopup()">&times;</span>
-      <h2>Enter Password</h2>
-      <input type="password" id="passwordInput" placeholder="Password">
-      <br><br>
-      <button onclick="checkPassword()">Login</button>
-      <p id="loginError" style="color:red;display:none;">Wrong password!</p>
+  <div class="overlay" id="loginOverlay">
+    <div class="popup">
+      <div class="popup-header">
+        <h2>Enter Password</h2>
+        <button class="close-btn" onclick="closeLogin()">&times;</button>
+      </div>
+      <input type="password" id="passwordInput" placeholder="Your secret password">
+      <div id="errorMsg" style="color:#cc0033; font-weight:bold; height:20px;"></div>
+      <button type="submit" onclick="checkPassword()">Login</button>
+      <button type="button" style="margin-top:10px; background:#999;" onclick="showChangePassword()">Change Password</button>
+    </div>
+  </div>
+
+  <!-- Change Password Popup -->
+  <div class="overlay" id="changePwOverlay">
+    <div class="popup">
+      <div class="popup-header">
+        <h2>Change Password</h2>
+        <button class="close-btn" onclick="closeChangePw()">&times;</button>
+      </div>
+      <input type="password" id="newPasswordInput" placeholder="Enter new password">
+      <button type="submit" onclick="changePassword()">Save New Password</button>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div id="main">
-    <h1>💌 Our Love Gift 💌</h1>
-    <p id="status">Saved!</p>
+  <div id="mainContainer">
+    <h1 contenteditable="true" id="title">My Special Gift</h1>
+    <p contenteditable="true" id="subtitle">For my baby, enjoy 💖</p>
+    <button class="gift-btn" onclick="openGift('photoPopup')">📸 Photo</button>
+    <button class="gift-btn" onclick="openGift('letterPopup')">✉️ Letter</button>
+    <button class="gift-btn" onclick="openGift('poemPopup')">📜 Poem</button>
+    <button class="gift-btn" onclick="openGift('surprisePopup')">🎁 Surprise</button>
+    <div id="status">Saved!</div>
+  </div>
 
-    <h2>Letter</h2>
-    <textarea id="letterArea" placeholder="Write your letter..."></textarea>
+  <!-- Gift Overlays -->
+  <div class="overlay" id="giftOverlay">
+    <!-- Photo -->
+    <div class="popup" id="photoPopup">
+      <div class="popup-header">
+        <h2>Upload Your Photo</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <label for="photoInput" style="cursor:pointer; color:#ff3399;">📤 Choose Photo</label>
+      <input type="file" id="photoInput" accept="image/*" style="display:none;">
+      <img id="photoPreview" alt="Photo Preview" style="display:none; max-width:100%; border-radius:10px; margin-top:10px;">
+      <div id="caption" contenteditable="true" style="display:none; margin-top:10px; border:1px dashed #ff99cc; padding:10px; border-radius:10px;">Write a caption...</div>
+      <button class="gift-btn" id="removePhotoBtn" style="display:none; margin-top:10px; background:#cc0033;">Remove Photo</button>
+    </div>
 
-    <h2>Poem</h2>
-    <textarea id="poemArea" placeholder="Write your poem..."></textarea>
+    <!-- Letter -->
+    <div class="popup" id="letterPopup">
+      <div class="popup-header">
+        <h2>Your Letter</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <textarea id="letterText" placeholder="Write your love letter..."></textarea>
+    </div>
 
-    <h2>Surprise</h2>
-    <textarea id="surpriseArea" placeholder="Write your surprise..."></textarea>
+    <!-- Poem -->
+    <div class="popup" id="poemPopup">
+      <div class="popup-header">
+        <h2>Your Poem</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <textarea id="poemText" placeholder="Write your sweet poem..."></textarea>
+    </div>
 
-    <h2>Photo</h2>
-    <input type="file" id="photoInput" accept="image/*">
-    <div class="photo-section">
-      <img id="photoPreview">
-      <p id="caption" contenteditable="true" style="display:none;"></p>
-      <button id="removePhotoBtn" style="display:none;">Remove Photo</button>
+    <!-- Surprise -->
+    <div class="popup" id="surprisePopup">
+      <div class="popup-header">
+        <h2>Your Surprise</h2>
+        <button class="close-btn" onclick="closeGift()">&times;</button>
+      </div>
+      <textarea id="surpriseText" placeholder="Add your surprise here..."></textarea>
     </div>
   </div>
 
-  <!-- Firebase -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
 
   <script>
-    // Firebase Config
+    // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyAZx8qN76w_gfgKZncYZ9q27el1N0dNDWU",
       authDomain: "love-gift-490e7.firebaseapp.com",
@@ -135,55 +247,80 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    const main = document.getElementById("main");
-    const loginPopup = document.getElementById("loginPopup");
-    const letterArea = document.getElementById("letterArea");
-    const poemArea = document.getElementById("poemArea");
-    const surpriseArea = document.getElementById("surpriseArea");
-    const photoInput = document.getElementById("photoInput");
-    const photoPreview = document.getElementById("photoPreview");
-    const caption = document.getElementById("caption");
-    const removePhotoBtn = document.getElementById("removePhotoBtn");
+    // Default password
+    let currentPassword = "120422";
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const mainContainer = document.getElementById("mainContainer");
+    const passwordInput = document.getElementById("passwordInput");
+    const errorMsg = document.getElementById("errorMsg");
     const statusEl = document.getElementById("status");
 
-    // Show "Saved!" briefly
-    function showSaved() {
+    // Load password from Firestore
+    db.collection("settings").doc("password").get().then(doc => {
+      if (doc.exists) currentPassword = doc.data().value;
+    });
+
+    window.onload = () => {
+      loginOverlay.style.display = "flex";
+      passwordInput.focus();
+    };
+
+    function checkPassword() {
+      if (passwordInput.value.trim() === currentPassword) {
+        loginOverlay.style.display = "none";
+        mainContainer.style.display = "block";
+      } else {
+        errorMsg.textContent = "Wrong password, try again!";
+        passwordInput.value = "";
+        passwordInput.focus();
+      }
+    }
+    function closeLogin() { loginOverlay.style.display = "none"; }
+
+    // Change password
+    const changePwOverlay = document.getElementById("changePwOverlay");
+    function showChangePassword() { changePwOverlay.style.display = "flex"; }
+    function closeChangePw() { changePwOverlay.style.display = "none"; }
+    function changePassword() {
+      const newPw = document.getElementById("newPasswordInput").value.trim();
+      if (!newPw) return alert("Enter a new password");
+      db.collection("settings").doc("password").set({ value: newPw }).then(() => {
+        currentPassword = newPw;
+        closeChangePw();
+        showStatus("Password Saved!");
+      });
+    }
+
+    // Gift popups
+    const giftOverlay = document.getElementById("giftOverlay");
+    const giftPopups = document.querySelectorAll("#giftOverlay .popup");
+    function openGift(id) {
+      giftOverlay.style.display = "flex";
+      giftPopups.forEach(p => p.style.display = "none");
+      document.getElementById(id).style.display = "block";
+    }
+    function closeGift() {
+      giftOverlay.style.display = "none";
+      giftPopups.forEach(p => p.style.display = "none");
+    }
+
+    // Status message
+    function showStatus(msg) {
+      statusEl.textContent = msg;
       statusEl.style.display = "block";
       setTimeout(() => { statusEl.style.display = "none"; }, 2000);
     }
 
-    // Login
-    function checkPassword() {
-      const pass = document.getElementById("passwordInput").value;
-      if (pass === "kentpogi") {
-        loginPopup.style.display = "none";
-        main.style.display = "block";
-      } else {
-        document.getElementById("loginError").style.display = "block";
-      }
-    }
+    // Photo
+    const photoInput = document.getElementById("photoInput");
+    const photoPreview = document.getElementById("photoPreview");
+    const caption = document.getElementById("caption");
+    const removePhotoBtn = document.getElementById("removePhotoBtn");
 
-    function closePopup() {
-      loginPopup.style.display = "none";
-    }
-
-    // Save Text Areas
-    function saveField(field, value) {
-      db.collection("gift").doc(field).set({ content: value, timestamp: Date.now() })
-        .then(showSaved);
-    }
-
-    letterArea.addEventListener("input", e => saveField("letter", e.target.value));
-    poemArea.addEventListener("input", e => saveField("poem", e.target.value));
-    surpriseArea.addEventListener("input", e => saveField("surprise", e.target.value));
-
-    // Sync Text Areas
-    db.collection("gift").doc("letter").onSnapshot(doc => { if (doc.exists) letterArea.value = doc.data().content; });
-    db.collection("gift").doc("poem").onSnapshot(doc => { if (doc.exists) poemArea.value = doc.data().content; });
-    db.collection("gift").doc("surprise").onSnapshot(doc => { if (doc.exists) surpriseArea.value = doc.data().content; });
-
-    // Save Photo
-    function savePhoto(file) {
+    photoInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
       const storageRef = storage.ref("photo/photo.jpg");
       storageRef.put(file).then(() => {
         storageRef.getDownloadURL().then(url => {
@@ -191,19 +328,20 @@
             imageUrl: url,
             caption: caption.textContent || "",
             timestamp: Date.now()
-          }).then(showSaved);
+          }).then(() => showStatus("Photo Saved!"));
         });
       });
-    }
-
-    photoInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (file) savePhoto(file);
     });
 
-    caption.addEventListener("input", () => {
-      db.collection("gift").doc("photo").update({ caption: caption.textContent })
-        .then(showSaved);
+    removePhotoBtn.addEventListener("click", () => {
+      const storageRef = storage.ref("photo/photo.jpg");
+      storageRef.delete().then(() => {
+        db.collection("gift").doc("photo").delete();
+        photoPreview.style.display = "none";
+        caption.style.display = "none";
+        removePhotoBtn.style.display = "none";
+        showStatus("Photo Removed");
+      });
     });
 
     db.collection("gift").doc("photo").onSnapshot(doc => {
@@ -216,18 +354,40 @@
           caption.textContent = data.caption || "";
           removePhotoBtn.style.display = "inline-block";
         }
-      } else {
-        photoPreview.style.display = "none";
-        caption.style.display = "none";
-        removePhotoBtn.style.display = "none";
       }
     });
 
-    removePhotoBtn.addEventListener("click", () => {
-      const storageRef = storage.ref("photo/photo.jpg");
-      storageRef.delete().then(() => {
-        db.collection("gift").doc("photo").delete().then(showSaved);
-      });
+    caption.addEventListener("input", () => {
+      db.collection("gift").doc("photo").update({
+        caption: caption.textContent
+      }).then(() => showStatus("Caption Saved!"));
+    });
+
+    // Letter
+    const letterText = document.getElementById("letterText");
+    letterText.addEventListener("input", () => {
+      db.collection("gift").doc("letter").set({ text: letterText.value }).then(() => showStatus("Letter Saved!"));
+    });
+    db.collection("gift").doc("letter").onSnapshot(doc => {
+      if (doc.exists) letterText.value = doc.data().text;
+    });
+
+    // Poem
+    const poemText = document.getElementById("poemText");
+    poemText.addEventListener("input", () => {
+      db.collection("gift").doc("poem").set({ text: poemText.value }).then(() => showStatus("Poem Saved!"));
+    });
+    db.collection("gift").doc("poem").onSnapshot(doc => {
+      if (doc.exists) poemText.value = doc.data().text;
+    });
+
+    // Surprise
+    const surpriseText = document.getElementById("surpriseText");
+    surpriseText.addEventListener("input", () => {
+      db.collection("gift").doc("surprise").set({ text: surpriseText.value }).then(() => showStatus("Surprise Saved!"));
+    });
+    db.collection("gift").doc("surprise").onSnapshot(doc => {
+      if (doc.exists) surpriseText.value = doc.data().text;
     });
   </script>
 </body>
