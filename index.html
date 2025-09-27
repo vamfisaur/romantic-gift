@@ -18,6 +18,7 @@
       color: #660066;
     }
 
+    /* Overlay (used for login & popups) */
     .overlay {
       position: fixed;
       top: 0; left: 0;
@@ -29,6 +30,7 @@
       z-index: 1000;
     }
 
+    /* Popup window */
     .popup {
       background: #fff;
       padding: 25px;
@@ -77,6 +79,7 @@
       background: #ffb3d9;
     }
 
+    /* Input + buttons */
     .popup input, .popup textarea {
       width: 100%;
       padding: 12px;
@@ -104,6 +107,7 @@
       background: #e05599;
     }
 
+    /* Main content */
     #mainContainer {
       display: none;
       background: #fff0f6;
@@ -128,11 +132,10 @@
 
     .gift-btn { margin: 8px 0; }
 
-    #status {
-      margin-top: 10px;
+    .status {
+      margin-top: 8px;
       font-size: 0.9rem;
       color: green;
-      font-weight: bold;
       display: none;
     }
 
@@ -157,31 +160,31 @@
       <input type="password" id="passwordInput" placeholder="Your secret password">
       <div id="errorMsg" style="color:#cc0033; font-weight:bold; height:20px;"></div>
       <button type="submit" onclick="checkPassword()">Login</button>
-      <button type="button" style="margin-top:10px; background:#999;" onclick="showChangePassword()">Change Password</button>
+      <button type="button" onclick="openChangePassword()" style="margin-top:10px;background:#cc66ff;">Change Password</button>
     </div>
   </div>
 
   <!-- Change Password Popup -->
-  <div class="overlay" id="changePwOverlay">
+  <div class="overlay" id="changePasswordOverlay">
     <div class="popup">
       <div class="popup-header">
         <h2>Change Password</h2>
-        <button class="close-btn" onclick="closeChangePw()">&times;</button>
+        <button class="close-btn" onclick="closeChangePassword()">&times;</button>
       </div>
       <input type="password" id="newPasswordInput" placeholder="Enter new password">
-      <button type="submit" onclick="changePassword()">Save New Password</button>
+      <button type="submit" onclick="saveNewPassword()">Save New Password</button>
+      <div id="passwordStatus" class="status">Saved!</div>
     </div>
   </div>
 
   <!-- Main Content -->
   <div id="mainContainer">
-    <h1 contenteditable="true" id="title">My Special Gift</h1>
-    <p contenteditable="true" id="subtitle">For my baby, enjoy 💖</p>
+    <h1 contenteditable="true" oninput="saveData('title', this.textContent)">My Special Gift</h1>
+    <p contenteditable="true" oninput="saveData('subtitle', this.textContent)">For my baby, enjoy 💖</p>
     <button class="gift-btn" onclick="openGift('photoPopup')">📸 Photo</button>
     <button class="gift-btn" onclick="openGift('letterPopup')">✉️ Letter</button>
     <button class="gift-btn" onclick="openGift('poemPopup')">📜 Poem</button>
     <button class="gift-btn" onclick="openGift('surprisePopup')">🎁 Surprise</button>
-    <div id="status">Saved!</div>
   </div>
 
   <!-- Gift Overlays -->
@@ -196,7 +199,8 @@
       <input type="file" id="photoInput" accept="image/*" style="display:none;">
       <img id="photoPreview" alt="Photo Preview" style="display:none; max-width:100%; border-radius:10px; margin-top:10px;">
       <div id="caption" contenteditable="true" style="display:none; margin-top:10px; border:1px dashed #ff99cc; padding:10px; border-radius:10px;">Write a caption...</div>
-      <button class="gift-btn" id="removePhotoBtn" style="display:none; margin-top:10px; background:#cc0033;">Remove Photo</button>
+      <button id="removePhotoBtn" style="display:none; margin-top:10px; background:#cc0033;">Remove Photo</button>
+      <div id="photoStatus" class="status">Saved!</div>
     </div>
 
     <!-- Letter -->
@@ -205,7 +209,8 @@
         <h2>Your Letter</h2>
         <button class="close-btn" onclick="closeGift()">&times;</button>
       </div>
-      <textarea id="letterText" placeholder="Write your love letter..."></textarea>
+      <textarea id="letterArea" placeholder="Write your love letter..." oninput="saveData('letter', this.value)"></textarea>
+      <div id="letterStatus" class="status">Saved!</div>
     </div>
 
     <!-- Poem -->
@@ -214,7 +219,8 @@
         <h2>Your Poem</h2>
         <button class="close-btn" onclick="closeGift()">&times;</button>
       </div>
-      <textarea id="poemText" placeholder="Write your sweet poem..."></textarea>
+      <textarea id="poemArea" placeholder="Write your sweet poem..." oninput="saveData('poem', this.value)"></textarea>
+      <div id="poemStatus" class="status">Saved!</div>
     </div>
 
     <!-- Surprise -->
@@ -223,17 +229,18 @@
         <h2>Your Surprise</h2>
         <button class="close-btn" onclick="closeGift()">&times;</button>
       </div>
-      <textarea id="surpriseText" placeholder="Add your surprise here..."></textarea>
+      <textarea id="surpriseArea" placeholder="Add your surprise here..." oninput="saveData('surprise', this.value)"></textarea>
+      <div id="surpriseStatus" class="status">Saved!</div>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
   <script>
-    // Your Firebase config
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAZx8qN76w_gfgKZncYZ9q27el1N0dNDWU",
       authDomain: "love-gift-490e7.firebaseapp.com",
@@ -243,58 +250,71 @@
       appId: "1:249512373513:web:105f1415f9ca11f85a77d8",
       measurementId: "G-9WC34ZQPE9"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // Default password
-    let currentPassword = "120422";
+    let currentPassword = "120422"; // default until loaded
 
+    // --- LOGIN ---
     const loginOverlay = document.getElementById("loginOverlay");
     const mainContainer = document.getElementById("mainContainer");
     const passwordInput = document.getElementById("passwordInput");
     const errorMsg = document.getElementById("errorMsg");
-    const statusEl = document.getElementById("status");
 
-    // Load password from Firestore
-    db.collection("settings").doc("password").get().then(doc => {
-      if (doc.exists) currentPassword = doc.data().value;
-    });
-
-    window.onload = () => {
+    window.onload = async () => {
       loginOverlay.style.display = "flex";
       passwordInput.focus();
+
+      // Load password from Firestore
+      const doc = await db.collection("settings").doc("password").get();
+      if (doc.exists) {
+        currentPassword = doc.data().value;
+      }
     };
 
     function checkPassword() {
       if (passwordInput.value.trim() === currentPassword) {
         loginOverlay.style.display = "none";
         mainContainer.style.display = "block";
+        loadData();
       } else {
         errorMsg.textContent = "Wrong password, try again!";
         passwordInput.value = "";
         passwordInput.focus();
       }
     }
-    function closeLogin() { loginOverlay.style.display = "none"; }
 
-    // Change password
-    const changePwOverlay = document.getElementById("changePwOverlay");
-    function showChangePassword() { changePwOverlay.style.display = "flex"; }
-    function closeChangePw() { changePwOverlay.style.display = "none"; }
-    function changePassword() {
-      const newPw = document.getElementById("newPasswordInput").value.trim();
-      if (!newPw) return alert("Enter a new password");
-      db.collection("settings").doc("password").set({ value: newPw }).then(() => {
-        currentPassword = newPw;
-        closeChangePw();
-        showStatus("Password Saved!");
+    function closeLogin() {
+      loginOverlay.style.display = "none";
+    }
+
+    // --- CHANGE PASSWORD ---
+    const changePasswordOverlay = document.getElementById("changePasswordOverlay");
+    const newPasswordInput = document.getElementById("newPasswordInput");
+    const passwordStatus = document.getElementById("passwordStatus");
+
+    function openChangePassword() {
+      changePasswordOverlay.style.display = "flex";
+    }
+    function closeChangePassword() {
+      changePasswordOverlay.style.display = "none";
+    }
+    function saveNewPassword() {
+      const newPass = newPasswordInput.value.trim();
+      if (!newPass) return;
+      db.collection("settings").doc("password").set({ value: newPass }).then(() => {
+        currentPassword = newPass;
+        passwordStatus.style.display = "block";
+        setTimeout(() => passwordStatus.style.display = "none", 2000);
       });
     }
 
-    // Gift popups
+    // --- GIFTS ---
     const giftOverlay = document.getElementById("giftOverlay");
     const giftPopups = document.querySelectorAll("#giftOverlay .popup");
+
     function openGift(id) {
       giftOverlay.style.display = "flex";
       giftPopups.forEach(p => p.style.display = "none");
@@ -305,14 +325,43 @@
       giftPopups.forEach(p => p.style.display = "none");
     }
 
-    // Status message
-    function showStatus(msg) {
-      statusEl.textContent = msg;
-      statusEl.style.display = "block";
-      setTimeout(() => { statusEl.style.display = "none"; }, 2000);
+    // --- SAVE / LOAD DATA ---
+    function saveData(field, value) {
+      db.collection("gift").doc("content").set({ [field]: value }, { merge: true }).then(() => {
+        const statusEl = document.getElementById(field + "Status");
+        if (statusEl) {
+          statusEl.style.display = "block";
+          setTimeout(() => statusEl.style.display = "none", 2000);
+        }
+      });
     }
 
-    // Photo
+    async function loadData() {
+      const doc = await db.collection("gift").doc("content").get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (data.title) document.querySelector("#mainContainer h1").textContent = data.title;
+        if (data.subtitle) document.querySelector("#mainContainer p").textContent = data.subtitle;
+        if (data.letter) document.getElementById("letterArea").value = data.letter;
+        if (data.poem) document.getElementById("poemArea").value = data.poem;
+        if (data.surprise) document.getElementById("surpriseArea").value = data.surprise;
+      }
+
+      // Photo
+      const photoDoc = await db.collection("gift").doc("photo").get();
+      if (photoDoc.exists) {
+        const pData = photoDoc.data();
+        if (pData.imageUrl) {
+          photoPreview.src = pData.imageUrl;
+          photoPreview.style.display = "block";
+          caption.style.display = "block";
+          caption.textContent = pData.caption || "Write a caption...";
+          removePhotoBtn.style.display = "inline-block";
+        }
+      }
+    }
+
+    // --- PHOTO UPLOAD ---
     const photoInput = document.getElementById("photoInput");
     const photoPreview = document.getElementById("photoPreview");
     const caption = document.getElementById("caption");
@@ -328,8 +377,20 @@
             imageUrl: url,
             caption: caption.textContent || "",
             timestamp: Date.now()
-          }).then(() => showStatus("Photo Saved!"));
+          }).then(() => {
+            photoStatus.style.display = "block";
+            setTimeout(() => photoStatus.style.display = "none", 2000);
+          });
         });
+      });
+    });
+
+    caption.addEventListener("input", () => {
+      db.collection("gift").doc("photo").set({
+        caption: caption.textContent
+      }, { merge: true }).then(() => {
+        photoStatus.style.display = "block";
+        setTimeout(() => photoStatus.style.display = "none", 2000);
       });
     });
 
@@ -340,54 +401,7 @@
         photoPreview.style.display = "none";
         caption.style.display = "none";
         removePhotoBtn.style.display = "none";
-        showStatus("Photo Removed");
       });
-    });
-
-    db.collection("gift").doc("photo").onSnapshot(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-        if (data.imageUrl) {
-          photoPreview.src = data.imageUrl;
-          photoPreview.style.display = "block";
-          caption.style.display = "block";
-          caption.textContent = data.caption || "";
-          removePhotoBtn.style.display = "inline-block";
-        }
-      }
-    });
-
-    caption.addEventListener("input", () => {
-      db.collection("gift").doc("photo").update({
-        caption: caption.textContent
-      }).then(() => showStatus("Caption Saved!"));
-    });
-
-    // Letter
-    const letterText = document.getElementById("letterText");
-    letterText.addEventListener("input", () => {
-      db.collection("gift").doc("letter").set({ text: letterText.value }).then(() => showStatus("Letter Saved!"));
-    });
-    db.collection("gift").doc("letter").onSnapshot(doc => {
-      if (doc.exists) letterText.value = doc.data().text;
-    });
-
-    // Poem
-    const poemText = document.getElementById("poemText");
-    poemText.addEventListener("input", () => {
-      db.collection("gift").doc("poem").set({ text: poemText.value }).then(() => showStatus("Poem Saved!"));
-    });
-    db.collection("gift").doc("poem").onSnapshot(doc => {
-      if (doc.exists) poemText.value = doc.data().text;
-    });
-
-    // Surprise
-    const surpriseText = document.getElementById("surpriseText");
-    surpriseText.addEventListener("input", () => {
-      db.collection("gift").doc("surprise").set({ text: surpriseText.value }).then(() => showStatus("Surprise Saved!"));
-    });
-    db.collection("gift").doc("surprise").onSnapshot(doc => {
-      if (doc.exists) surpriseText.value = doc.data().text;
     });
   </script>
 </body>
