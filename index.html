@@ -7,36 +7,21 @@
   <style>
     * { box-sizing: border-box; }
 
-    :root {
-      --pink: #ff66b2;
-      --deep: #660066;
-      --light: #fff0f6;
-      --blue: #66b3ff;
-    }
-
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: linear-gradient(135deg, var(--pink), var(--blue), var(--deep));
+      background: linear-gradient(135deg, #ff66b2, #660066);
       margin: 0;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: var(--deep);
-      overflow-y: auto;
+      color: #660066;
     }
 
-    /* Blur when modal open */
-    body.modal-open .app,
-    body.modal-open .decor {
-      filter: blur(6px);
-      pointer-events: none;
-    }
-
-    /* Overlay */
     .overlay {
       position: fixed;
-      inset: 0;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0,0,0,0.5);
       display: none;
       justify-content: center;
@@ -44,7 +29,6 @@
       z-index: 1000;
     }
 
-    /* Popup */
     .popup {
       background: #fff;
       padding: 25px;
@@ -68,24 +52,17 @@
       margin-bottom: 20px;
     }
 
-    .popup-header h2 {
-      margin: 0;
-      font-size: 1.5rem;
-      color: var(--deep);
-    }
+    .popup-header h2 { margin: 0; font-size: 1.5rem; color: #660066; }
 
     .close-btn {
       background: #ffe6f2;
       border: none;
       font-size: 1.5rem;
-      color: var(--pink);
+      color: #ff3399;
       cursor: pointer;
       border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      width: 35px; height: 35px;
+      display: flex; justify-content: center; align-items: center;
       transition: background 0.2s;
     }
     .close-btn:hover { background: #ffb3d9; }
@@ -101,7 +78,7 @@
 
     .popup button[type="submit"],
     .gift-btn {
-      background: var(--pink);
+      background: #ff66b2;
       color: #fff;
       border: none;
       padding: 12px;
@@ -112,13 +89,11 @@
       width: 100%;
     }
     .popup button[type="submit"]:hover,
-    .gift-btn:hover {
-      background: #e05599;
-    }
+    .gift-btn:hover { background: #e05599; }
 
     #mainContainer {
       display: none;
-      background: var(--light);
+      background: #fff0f6;
       padding: 40px 20px;
       border-radius: 20px;
       max-width: 600px;
@@ -133,53 +108,15 @@
       margin-bottom: 10px;
     }
 
-    #mainContainer p {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-    }
+    #mainContainer p { font-size: 1.2rem; margin-bottom: 20px; }
 
     .gift-btn { margin: 8px 0; }
 
-    #photoPreview {
-      display:none;
-      max-width:100%;
-      border-radius:10px;
-      margin-top:10px;
-      box-shadow:0 4px 10px rgba(0,0,0,0.2);
-    }
-
-    /* Welcome Overlay */
-    #welcomeOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(255,255,255,0.8);
+    #statusMsg {
+      font-size: 0.9rem;
+      margin-top: 8px;
+      color: green;
       display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      flex-direction: column;
-      font-family: 'Sacramento', cursive;
-      font-size: 60px;
-      color: var(--deep);
-      opacity: 0;
-      animation: fadeIn 1s forwards;
-    }
-    #welcomeOverlay .hearts {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    #welcomeOverlay .hearts span {
-      font-size: 40px;
-      animation: floatUp 3s ease-in-out infinite;
-    }
-    #welcomeOverlay .hearts span:nth-child(2){ animation-delay: .3s; }
-    #welcomeOverlay .hearts span:nth-child(3){ animation-delay: .6s; }
-
-    @keyframes floatUp {
-      0%   { transform: translateY(0) scale(1); opacity: 1; }
-      50%  { transform: translateY(-30px) scale(1.2); opacity: 0.8; }
-      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     @media (max-width: 480px) {
@@ -193,12 +130,11 @@
 </head>
 <body>
 
-  <!-- Login -->
+  <!-- Login Popup -->
   <div class="overlay" id="loginOverlay">
     <div class="popup">
       <div class="popup-header">
         <h2>Enter Password</h2>
-        <button class="close-btn" onclick="closeModal(loginOverlay)">&times;</button>
       </div>
       <input type="password" id="passwordInput" placeholder="Your secret password">
       <div id="errorMsg" style="color:#cc0033; font-weight:bold; height:20px;"></div>
@@ -208,12 +144,13 @@
 
   <!-- Main Content -->
   <div id="mainContainer">
-    <h1 contenteditable="true">My Special Gift</h1>
-    <p contenteditable="true">For my baby, enjoy 💖</p>
+    <h1 contenteditable="true" id="title">My Special Gift</h1>
+    <p contenteditable="true" id="subtitle">For my baby, enjoy 💖</p>
     <button class="gift-btn" onclick="openGift('photoPopup')">📸 Photo</button>
     <button class="gift-btn" onclick="openGift('letterPopup')">✉️ Letter</button>
     <button class="gift-btn" onclick="openGift('poemPopup')">📜 Poem</button>
     <button class="gift-btn" onclick="openGift('surprisePopup')">🎁 Surprise</button>
+    <div id="statusMsg">Saved ✅</div>
   </div>
 
   <!-- Gift Overlays -->
@@ -226,7 +163,7 @@
       </div>
       <label for="photoInput" style="cursor:pointer; color:#ff3399;">📤 Choose Photo</label>
       <input type="file" id="photoInput" accept="image/*" style="display:none;">
-      <img id="photoPreview" alt="Photo Preview">
+      <img id="photoPreview" alt="Photo Preview" style="display:none; max-width:100%; border-radius:10px; margin-top:10px;">
       <div id="caption" contenteditable="true" style="display:none; margin-top:10px; border:1px dashed #ff99cc; padding:10px; border-radius:10px;">Write a caption...</div>
     </div>
 
@@ -258,20 +195,10 @@
     </div>
   </div>
 
-  <!-- Welcome Overlay -->
-  <div id="welcomeOverlay">
-    <div>Welcome 💖</div>
-    <div class="hearts">
-      <span>💗</span>
-      <span>💖</span>
-      <span>💞</span>
-    </div>
-  </div>
-
+  <!-- Firebase + Firestore -->
   <script type="module">
-    // Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAZx8qN76w_gfgKZncYZ9q27el1N0dNDWU",
@@ -292,23 +219,19 @@
     const mainContainer = document.getElementById("mainContainer");
     const passwordInput = document.getElementById("passwordInput");
     const errorMsg = document.getElementById("errorMsg");
+    const statusMsg = document.getElementById("statusMsg");
 
+    // show login on load
     window.onload = () => {
       loginOverlay.style.display = "flex";
       passwordInput.focus();
-      document.body.classList.add('modal-open');
+      loadData();
     };
 
     function checkPassword() {
       if (passwordInput.value.trim() === PASSWORD) {
-        closeModal(loginOverlay);
+        loginOverlay.style.display = "none";
         mainContainer.style.display = "block";
-
-        // Show welcome overlay
-        const welcome = document.getElementById('welcomeOverlay');
-        welcome.style.display = 'flex';
-        setTimeout(()=> { welcome.style.opacity = '1'; }, 50);
-        setTimeout(()=> { welcome.style.display = 'none'; }, 4000);
       } else {
         errorMsg.textContent = "Wrong password, try again!";
         passwordInput.value = "";
@@ -316,42 +239,23 @@
       }
     }
 
-    function showModal(el) { 
-      el.style.display = 'flex'; 
-      el.setAttribute('aria-hidden','false'); 
-      document.body.classList.add('modal-open'); 
-    }
-
-    function closeModal(el) { 
-      el.style.display = 'none'; 
-      el.setAttribute('aria-hidden','true'); 
-      document.body.classList.remove('modal-open'); 
-    }
-
     // Gift popups
     const giftOverlay = document.getElementById("giftOverlay");
     const giftPopups = document.querySelectorAll("#giftOverlay .popup");
 
-    function openGift(id) {
+    window.openGift = function(id) {
       giftOverlay.style.display = "flex";
       giftPopups.forEach(p => p.style.display = "none");
       document.getElementById(id).style.display = "block";
     }
-    function closeGift() {
+
+    window.closeGift = function() {
       giftOverlay.style.display = "none";
       giftPopups.forEach(p => p.style.display = "none");
+      saveData();
     }
 
-    // Firestore save/load
-    async function saveData(type, content) {
-      await setDoc(doc(db,"gifts",type),{ content });
-    }
-    async function loadData(type, cb) {
-      const snap = await getDoc(doc(db,"gifts",type));
-      if (snap.exists()) cb(snap.data().content);
-    }
-
-    // Photo
+    // Photo upload
     const photoInput = document.getElementById("photoInput");
     const photoPreview = document.getElementById("photoPreview");
     const caption = document.getElementById("caption");
@@ -360,36 +264,46 @@
       const file = photoInput.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = async e => {
-        const base64 = e.target.result;
-        photoPreview.src = base64;
+      reader.onload = e => {
+        photoPreview.src = e.target.result;
         photoPreview.style.display = "block";
         caption.style.display = "block";
-        await saveData("photo", base64);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // converts to base64
     });
 
-    loadData("photo", data=>{
-      photoPreview.src = data;
-      photoPreview.style.display = "block";
-      caption.style.display = "block";
-    });
+    async function saveData() {
+      const data = {
+        title: document.getElementById("title").textContent,
+        subtitle: document.getElementById("subtitle").textContent,
+        caption: caption.textContent,
+        photo: photoPreview.src || "",
+        letter: document.getElementById("letterText").value,
+        poem: document.getElementById("poemText").value,
+        surprise: document.getElementById("surpriseText").value
+      };
+      await setDoc(doc(db, "giftData", "shared"), data);
+      statusMsg.style.display = "block";
+      setTimeout(() => statusMsg.style.display = "none", 2000);
+    }
 
-    // Letter
-    const letterText = document.getElementById("letterText");
-    letterText.addEventListener("input", ()=> saveData("letter",letterText.value));
-    loadData("letter",data=> letterText.value=data);
-
-    // Poem
-    const poemText = document.getElementById("poemText");
-    poemText.addEventListener("input", ()=> saveData("poem",poemText.value));
-    loadData("poem",data=> poemText.value=data);
-
-    // Surprise
-    const surpriseText = document.getElementById("surpriseText");
-    surpriseText.addEventListener("input", ()=> saveData("surprise",surpriseText.value));
-    loadData("surprise",data=> surpriseText.value=data);
+    async function loadData() {
+      const docSnap = await getDoc(doc(db, "giftData", "shared"));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById("title").textContent = data.title || "My Special Gift";
+        document.getElementById("subtitle").textContent = data.subtitle || "For my baby, enjoy 💖";
+        if (data.photo) {
+          photoPreview.src = data.photo;
+          photoPreview.style.display = "block";
+          caption.style.display = "block";
+          caption.textContent = data.caption || "Write a caption...";
+        }
+        document.getElementById("letterText").value = data.letter || "";
+        document.getElementById("poemText").value = data.poem || "";
+        document.getElementById("surpriseText").value = data.surprise || "";
+      }
+    }
   </script>
 </body>
 </html>
